@@ -2,10 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { AuthBody } from './auth.controller';
 import { PrismaService } from 'src/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { access } from 'fs';
 
 @Injectable()
 export class AuthService {
-    constructor(private readonly prismaService: PrismaService) { }
+    constructor(
+        private readonly prismaService: PrismaService,
+        private jwtService: JwtService) { }
 
     async login(authBody: AuthBody) {
         const existingUser= await this.prismaService.user.findUnique({
@@ -26,7 +30,17 @@ export class AuthService {
             throw new Error("Invalid password");
         }
 
-        return existingUser;
+        const payload= { username: existingUser.email, sub: existingUser.id };
+        const token= await this.jwtService.signAsync(payload);
+
+        return token;
+    }
+
+    private async authenticateUser(userId: string) {
+        const payload= { userId }
+        return {
+            access_token: await this.jwtService.signAsync(payload)
+        }
     }
 
     private async hashPassword(password: string) {
