@@ -30,13 +30,13 @@ export class AuthService {
             throw new Error("Invalid password");
         }
 
-        return await this.authenticateUser(existingUser.id);
+        return await this.authenticateUser(existingUser.id, authBody.email);
     }
 
-    private async authenticateUser(userId: string) {
-        const payload= { userId }
+    private async authenticateUser(userId: string, email: string) {
+        const payload= { userId, email };
         return {
-            access_token: await this.jwtService.signAsync(payload)
+            access_token: this.jwtService.sign(payload)
         }
     }
 
