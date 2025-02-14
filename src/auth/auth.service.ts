@@ -30,10 +30,7 @@ export class AuthService {
             throw new Error("Invalid password");
         }
 
-        const payload= { username: existingUser.email, sub: existingUser.id };
-        const token= await this.jwtService.signAsync(payload);
-
-        return token;
+        return await this.authenticateUser(existingUser.id);
     }
 
     private async authenticateUser(userId: string) {
