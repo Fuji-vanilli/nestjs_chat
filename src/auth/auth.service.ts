@@ -5,6 +5,11 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { access } from 'fs';
 
+export type UserPayload = {
+    userId: string,
+    email: string
+}
+
 @Injectable()
 export class AuthService {
     constructor(
@@ -30,11 +35,16 @@ export class AuthService {
             throw new Error("Invalid password");
         }
 
-        return await this.authenticateUser(existingUser.id, authBody.email);
+        const userPayload= {
+            userId: existingUser.id,
+            email: existingUser.email
+        }
+
+        return await this.authenticateUser(userPayload);
     }
 
-    private async authenticateUser(userId: string, email: string) {
-        const payload= { userId, email };
+    private async authenticateUser(userPayload: UserPayload) {
+        const payload: UserPayload= userPayload;
         return {
             access_token: this.jwtService.sign(payload)
         }
